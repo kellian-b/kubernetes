@@ -1,0 +1,32 @@
+---
+#FROM SCRATCH INSTALL
+#A basic install for 3 slaves computers
+
+- name: Package Installation
+  hosts: slaves  #group "slaves" is declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+  tasks:
+    - name: Package Installation
+      apt: name={{ item }} update_cache=yes  state=latest #apt update & last version installed
+      with_items: #apt install x
+        - ssh
+        - lxd
+        - python3-lxc
+        - lxc-utils
+        - lxctl
+        - htop
+        - bridge-utils
+        - libvirt-bin
+        - debootstrap
+        - ifupdown
+        - net-tools
+        - ntpdate
+        - nmap
+        - git
+       
+
+    - name: Listen on the 8443 port for LXC Remote
+      command: lxc config set core.https_address [::]:8443
+      command: lxc config set core.trust_password toto 
+...

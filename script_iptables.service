@@ -1,0 +1,8 @@
+[Unit]
+Description=Startup
+
+[Service]
+ExecStart=/home/sio-master/script_iptables.sh
+
+[Install]
+WantedBy=default.target
