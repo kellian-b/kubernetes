@@ -8,17 +8,15 @@
 		<br>
 	<li>OS: Ubuntu 18.04 Server LTS</li>
 </ul>
-<b>Network organization:</b>
-<br>
+<p><b>Network organization:</b></p>
 	<ul>
 		<li>Master: It welcome DHCP/PXE server, iptables script, LXC Remote Control, Ansible playbooks. It have 2 network interfaces (1 LAN & 1 WAN) and plays the gateway for slaves which will want to have Internet access</li>
 		<li>Slaves: They will hosts LXC/Docker container to start services from scratch, allowing them to not loose ressources... </li>
 		<li>Switch: It interconnect Master and Slaves</li>
 	</ul>
-<b>Tasks order:</b>
-<br>
+<p><b>Tasks order:</b></p>
 <i>PS: All steps are first done by hand to get used with the different tools. If you're not a beginner, you can directly go to the step 12, to automate all the previous one</i>
-<br>
+<br />
 	<ol>
 		<li>Deploying OS on bare metal </li>
 		<li>Configuring a DHCP server (on Master) which gives IP address to slaves</li>
@@ -26,7 +24,7 @@
 		<li>SSH configuration with Password Authentication</li>
 		<li>LXD install on slaves</li>
 		<li>Configuring LXD Remote on Master</li>
-		<li>Confiuring a LXC profile which allows container to get IP address from the DHCP server</li>
+		<li>Configuring a LXC profile which allows container to get IP address from the DHCP server</li>
 		<li>SSH configuration with PubKey Authentication</li>
 		<li>Configuring fail2ban to counter Brute Force attacks</li>
 		<li>Configuring PXE/tftpd-hpa to automate installation from scratch</li>
@@ -45,3 +43,13 @@
 So let's go make your bootable USB key and join us at the second step!</p>
 
 <h2>2- Configuring a DHCP server (on Master) which gives IP address to slaves</h2>
+<h2>3- Configuring iptables to allow Slaves to have Internet access</h2>
+<h2>4- SSH configuration with Password Authentication</h2>
+<h2>5- LXD install on slaves</h2>
+<h2>6- Configuring LXD Remote on Master</h2>
+<h2>7- Configuring a LXC profile which allows container to get IP address from the DHCP server</h2>
+<h2>8- SSH configuration with PubKey Authentication</h2>
+<h2>9- Configuring fail2ban to counter Brute Force attacks</h2>
+<h2>10- Configuring PXE/tftpd-hpa to automate installation from scratch</h2>
+<h2>11- Kubernetes Cluster install</h2>
+<h2>12- Ansible: Let's do it again from scratch !</h2>
