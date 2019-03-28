@@ -124,7 +124,7 @@ You don't need to restart ssh service because the changes are applied instantly.
 So, we wants to protect our SSH connection by configuring a protection against Brute Force attacks. Let's do this!</p>
 
 <h2>9- Configuring fail2ban to counter Brute Force attacks</h2>
-<p><b>What is fail2ban?<b><br>
+<p><b>What is fail2ban?</b><br>
 	Fail2ban is a tool that allows you to automatically ban IP addresses if they do not respect the rules you define beforehand. For example, a person tries to connect in SSH on your server but this person fails to connect 4 times in succession. Fail2ban will ban its IP address so that this person no longer has the right to communicate with your server. Fail2ban knows that it must ban the IP after 4 failed attempts because it has been defined in its configuration files.</p>
 	<p>We wants to protect our Master node, which host the principal service of the Network (DHCP server, iptables, PXE server...). It have a WAN interface and it exposed to have attacks.</p>
 	
