@@ -103,12 +103,62 @@ We create the container "test" and attach it the "lanprofile" profile:<br>
 
 	lxc launch -p lanprofile ubuntu:18.04 test
 	
-Now check that your container has recovered an address from your DHCP: <br>
+Now check that your container has recovered an address from your DHCP: <br></p>
 
 	lxc exec test ip route
 
 <h2>8- SSH configuration with PubKey Authentication</h2>
+<p>We are now tired of having to enter a password each time we connect to SSH. We will therefore disable password authentication and configure key authentication.</p>
+We have chosen to use rsa key because it is more secure.
+<p> On our Master server, we generate a key and send it to our slaves:<br>
+	
+	ssh-keygen -t rsa
+	ssh-copy-id 192.168.100.48
+	ssh-copy-id 192.168.100.23
+	ssh-copy-id 192.168.100.26
+	
+After that, you need to disable PasswordAuthentication by setting it to "no" and set the PubKeyAuthentication to "yes" in the ssh configuration file (/etc/ssh/sshd_config).<br>
+You don't need to restart ssh service because the changes are applied instantly.</p>
+
+<p>We have configured a SSH PubKey Authentication, we are more protected than a basic Password Authencation. However, if in the future, we wants to return to Password Authentication for practical reasons, we will be in a danger and vulnerable to Brute Force attacks.<br>
+So, we wants to protect our SSH connection by configuring a protection against Brute Force attacks. Let's do this!</p>
+
 <h2>9- Configuring fail2ban to counter Brute Force attacks</h2>
+<p><b>What is fail2ban?<b><br>
+	Fail2ban is a tool that allows you to automatically ban IP addresses if they do not respect the rules you define beforehand. For example, a person tries to connect in SSH on your server but this person fails to connect 4 times in succession. Fail2ban will ban its IP address so that this person no longer has the right to communicate with your server. Fail2ban knows that it must ban the IP after 4 failed attempts because it has been defined in its configuration files.</p>
+	<p>We wants to protect our Master node, which host the principal service of the Network (DHCP server, iptables, PXE server...). It have a WAN interface and it exposed to have attacks.</p>
+	
+<p>First, install the package on your Master (if you want, you can install it on every computer in your network to protect all SSH connection.</p><br>
+
+	apt install fail2ban
+	
+<p>Now, we need to create our own configuration file in "/etc/fail2ban/jail.d/". We'll call it "custom.conf".<br>
+	
+	nano /etc/fail2ban/jail.d/custom.conf
+
+Now, insert the following text:
+
+	[DEFAULT]
+	findtime = 3600
+	bantime = 24h
+	maxretry = 3
+	
+	[sshd]
+	enabled = true
+	
+findtime: define the time (second) during an anomaly is searched in logs<br>
+bantime: duration of ban after the maxretry number<br>
+maxretry: define how many fails we autorize before a jail<br></p>
+
+<p>We have activate fail2ban on SSH with the section "[sshd]". You can activate fail2ban on the services which needs a password authentication and that you want to protect.</p>
+
+<p>Now, restart the service and check if it is active:<br>
+	
+	service fail2ban restar
+	fail2ban-client status
+
+
+
 <h2>10- Configuring PXE/tftpd-hpa to automate installation from scratch</h2>
 <h2>11- Kubernetes Cluster install</h2>
 <h2>12- Ansible: Let's do it again from scratch !</h2>
