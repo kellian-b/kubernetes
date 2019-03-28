@@ -58,9 +58,55 @@ We will configure authentication by key later on.
 <br>
 
 
-<h2>5- LXD install on slaves</h2>
+<h2>5- LXD install</h2>
+<p><b>Why?</b><br>
+	We want to evaluate if it is possible to deploy a Kubernetes cluster. If this is the case, the Kubernetes cluster can be integrated into a computing cluster, 100% made up of LXC containers.<br>
+We therefore want to familiarize ourselves with the LXC/LXD tools. </p>
+<p>So, you can skip LXD steps (5/6/7) if you don't need to learn the basics of LXC.</p>
+<p>First, let's install LXD package with "apt install lxd" command.<br>
+After the install is complete, do a "lxd init" to initialize your lxd. You can let all the default settings or change it as you wish.</p>
+
+<p>This is a list of basic LXC commands:<br>
+	
+	[...]
+
 <h2>6- Configuring LXD Remote on Master</h2>
+<p>The advantage of LXD is that you can lauch container remotly. It can be very useful if you want to start services from scratch on different computers, as a secundary DHCP server, a WEB server...</p>
+<p>To do that, we will order to lxc (on both Master and Slaves) to listen on a specific port. This is the commands whichs allow to start container on Slaves from the Master:<br>
+	
+	[...]
+	
 <h2>7- Configuring a LXC profile which allows container to get IP address from the DHCP server</h2>
+<p>Now, we wants our containers to get IP address from the DHCP server which is hosted on the Master. We need to create a specific profil and apply it to the container:
+	
+	lxc profile copy default lanprofile
+	lxc profile list
+	
+We have copied the default LXC profile as a "lanprofile", we can see him with "lxc profile list".<br>
+Now, let's see what is the default configuration of our profile:<br>
+
+ 	lxc profile show lanprofile
+
+There are 2 values that we are going to change: "nictype" will become "macvlan" and "parent" will become our network interface. To be sure of our interface, do the following command:<br>
+
+	ip route show default 0.0.0.0/0
+	
+	default via 192.168.1.1 dev enps5s12 proto static metric 1OO
+	
+We can see that our interface is "enp5s12". So, let's change what we said:<br>
+
+	lxc profile device set lanprofile eth0 nictype macvlan
+	lxc profile device set lanprofile eth0 parent enp5s12
+	
+We can now create containers by attaching the "lanprofile" profile to them. New containers can now get ip address from the DHCP server.<br>
+We create the container "test" and attach it the "lanprofile" profile:<br>
+
+	lxc launch -p lanprofile ubuntu:18.04 test
+	
+Now check that your container has recovered an address from your DHCP: <br>
+
+	lxc exec test ip route
+
 <h2>8- SSH configuration with PubKey Authentication</h2>
 <h2>9- Configuring fail2ban to counter Brute Force attacks</h2>
 <h2>10- Configuring PXE/tftpd-hpa to automate installation from scratch</h2>
