@@ -15,8 +15,8 @@
 		<li>Switch: It interconnect Master and Slaves</li>
 	</ul>
 <p><b>Tasks order:</b></p>
-<i>PS: All steps are first done by hand to get used with the different tools. If you're not a beginner, you can directly go to the step 12, to automate all the previous one</i>
-<br />
+<i>PS: All steps are first done by hand to get used with the different tools. If you're not a beginner, you can directly go to the step 12, to automate all the previous one.</i>
+<br>
 	<ol>
 		<li>Deploying OS on bare metal </li>
 		<li>Configuring a DHCP server (on Master) which gives IP address to slaves</li>
@@ -44,7 +44,20 @@ So let's go make your bootable USB key and join us at the second step!</p>
 
 <h2>2- Configuring a DHCP server (on Master) which gives IP address to slaves</h2>
 <h2>3- Configuring iptables to allow Slaves to have Internet access</h2>
+<br>
 <h2>4- SSH configuration with Password Authentication</h2>
+<p>We want have SSH connection between our Master and their Slaves to remote control them.</p><br>
+To do that, we need to install SSH packages on both Master and Slaves with the command "apt install SSH".
+<br>
+Now, we just check if, in the file "/etc/ssh/sshd_config", the line "PasswordAuthentication" is uncommented.
+In our case, we want to have an entire control of our machines, and we will set "PermitRootLogin" and "PasswordAuthentication" as "yes".
+<br>
+Be aware that if your password have special character or number, SSH connection could be failed (we have encountered this problem).
+<br>
+We will configure authentication by key later on.
+<br>
+
+
 <h2>5- LXD install on slaves</h2>
 <h2>6- Configuring LXD Remote on Master</h2>
 <h2>7- Configuring a LXC profile which allows container to get IP address from the DHCP server</h2>
