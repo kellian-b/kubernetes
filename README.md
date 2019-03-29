@@ -15,7 +15,7 @@
 		<li>Switch: It interconnect Master and Slaves</li>
 	</ul>
 <p><b>Tasks order:</b></p>
-<i>PS: All steps are first done by hand to get used with the different tools. If you're not a beginner, you can directly go to the step 12, to automate all the previous one.</i>
+<p><i>PS: All steps are first done by hand to get used with the different tools. If you're not a beginner, you can directly go to the step 12, to automate all the previous one.</i></p>
 <br>
 	<ol>
 		<li>Deploying OS on bare metal </li>
@@ -74,7 +74,52 @@ After the install is complete, do a "lxd init" to initialize your lxd. You can l
 <p>The advantage of LXD is that you can lauch container remotly. It can be very useful if you want to start services from scratch on different computers, as a secundary DHCP server, a WEB server...</p>
 <p>To do that, we will order to lxc (on both Master and Slaves) to listen on a specific port. This is the commands whichs allow to start container on Slaves from the Master:<br>
 	
-	[...]
+	lxc config set core.https_address [::]:8443
+
+We can define now a password to protect our port:<br>
+	
+	lxc config set core.trust_password yourpassword
+	
+Now that the daemon configuration is done on both ends, you can add a slave server to your local client with:<br>
+
+	lxc remote add sio-slave2 192.168.100.26
+	
+You can then list your remotes and you'll see "sio-slave2" listed there:<br>
+
+	lxc remote list
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	|      NAME       |                   URL                    |   PROTOCOL    | AUTH TYPE | PUBLIC | STATIC |
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	| images          | https://images.linuxcontainers.org       | simplestreams |           | YES    | NO     |
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	| local (default) | unix://                                  | lxd           | tls       | NO     | YES    |
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	| sio-slave2      | https://192.168.100.26:8443              | lxd           | tls       | NO     | NO     |
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	| ubuntu          | https://cloud-images.ubuntu.com/releases | simplestreams |           | YES    | YES    |
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	| ubuntu-daily    | https://cloud-images.ubuntu.com/daily    | simplestreams |           | YES    | YES    |
+	+-----------------+------------------------------------------+---------------+-----------+--------+--------+
+	
+So we have now a remote server defined, we can now launch a container remotly:
+
+	lxc launch ubuntu:18.04 test
+	
+List tje running containers to verify that it works:
+
+	lxc list sio-slave2
+	
+Finally, getting a shell into a remote container works just as you would expect:
+
+	lxc exec sio-slave2:test bash
+	
+We can do many remote commands:
+	
+	lxc copy sio-slave2:test current
+	lxc stop sio-slave2:test
+	lxc move sio-slave2:test test2
+	
+	lxc snapshot sio-slave2:test current
 	
 <h2>7- Configuring a LXC profile which allows container to get IP address from the DHCP server</h2>
 <p>Now, we wants our containers to get IP address from the DHCP server which is hosted on the Master. We need to create a specific profil and apply it to the container:
