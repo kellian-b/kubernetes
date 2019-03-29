@@ -124,8 +124,10 @@ Your script for iptables rules will now execute itself when you restart the mast
 
 <h2>4- SSH configuration with Password Authentication</h2>
 <p>We want have SSH connection between our Master and their Slaves to remote control them.</p><br>
-To do that, we need to install SSH packages on both Master and Slaves with the command "apt install SSH".
-<br>
+To do that, we need to install SSH packages on both Master and Slaves:
+
+	apt install ssh
+
 Now, we just check if, in the file "/etc/ssh/sshd_config", the line "PasswordAuthentication" is uncommented.
 In our case, we want to have an entire control of our machines, and we will set "PermitRootLogin" and "PasswordAuthentication" as "yes".
 <br>
@@ -346,3 +348,50 @@ Verify that Docker CE is installed correctly by running the hello-world image.
 	sudo docker run hello-world
 
 <h2>12- Ansible: Let's do it again from scratch!</h2>
+
+All we did can be automated with a predefined recipe: Ansible allows us to create playbooks which will contain the commands we did before. So, firts, install Ansible on your Master server:
+
+	apt install ansible
+	
+<p><b>/!\WARNING/!\</b> Make sure that SSH PubKey AUthentication is working and PermitRootLogin set to "yes": Ansible works with SSH and we will order to Ansible to execute our commands with the Root user.</p>
+
+<p>In /etc/ansible you can see that there is a file named "hosts". This file contains the declaration of our clients IP address. Let's create a group with our slaves and a group for our master:</p>
+
+	nano /etc/ansible/hosts
+	
+	[...]
+	[slaves]
+	#sio-slave1
+	192.168.100.10
+	#sio-slave2
+	192.168.100.20
+	#sio-slave3
+	192.168.100.30
+	
+	[slaves:vars]
+	ansible_python_interpreter=/usr/bin/python3 #We want to use python3
+		
+	[master]
+	#For security reasons, our Master IP is replaced by 1.2.3.4
+	1.2.3.4
+	
+	[master:vars]
+	ansible_python_interpreter=/usr/bin/python3 #We want to use python3
+	
+<p>Hosts file is essential, it's it which specify to Ansible the IP adress that playbooks must contact.<br>
+Now, you can check if your Ansible success to contact your client with:
+	
+	ansible -m ping all
+		
+Ansible will try to ping the IP adress you specified. If it failed, it can be SSH connection problems.</p>
+	
+<p>That's all for the hosts file, now, we must configure our playbook which will automate everything we've done before.<br>
+	In our case, we wants 2 playbooks: 1 for the Master, and 1 for the Slaves.
+	I invite you to read the configuraton file higher up to configure it.</p>
+	
+<p>Once your playbooks are ready, you can deploy them:
+	
+	ansible-playbook -i hosts master-playbook.yml
+	
+Ansible permit you to follow the reading of the playbook, so you can see, at the end, if values have "changed" or if there are some problems.</p>
+	
