@@ -60,7 +60,7 @@ And you can create your own subnet as such :
   	option domain-name-servers 147.99.64.102, 147.99.0.248;	 #DNS addresses
   	option domain-name "sio.internal.lan";
   	option subnet-mask 255.255.255.0;
-  	option routers 192.168.100.12;		#The default gateway that'll be used by the machines inside your subnet
+  	option routers 192.168.100.12;	#The default gateway that will be used by the machines inside your subnet
 	default-lease-time 600;
 	max-lease-time 7200;
 	}
@@ -69,16 +69,46 @@ We now need to tell the dhcp service on which interface it needs to listen to gi
 
 	nano /etc/default/isc-dhcp-server
 	
-/!\ WARNING /!\ Be sure that the interface you indicate isn't the one connected to the already existing subnet of the company (such is the case in our context) or the dhcp server will give ip addresses to everybody in the company instead of the machines in your private subnet, causing a loss of internet in the company.<br>
+<b> /!\ WARNING /!\ </b> Be sure that the interface you indicate isn't the one connected to the already existing subnet of the company (such is the case in our context) or the dhcp server will give ip addresses to everybody in the company instead of the machines in your private subnet, causing a loss of internet in the company.<br>
 Add those two lines, indicating the right interface (in our case, the interface connected to our subnet is enp1s0):
 
 	INTERFACESv4="enp1s0"
 	INTERFACESv6="enp1s0"
 	
-You DHCP server will now give an ip to any machine connected on his interface enp1s0.
+Your DHCP server will now give an ip to any machine connected on his interface enp1s0.
 
 <h2>3- Configuring iptables to allow Slaves to have Internet access</h2>
 <br>
+
+To allow the machines inside the subnet to have internet access, we need to add some iptables rules. To do so, we got a script  implamenting several iptables rules : See the <b>script_iptables.sh<b/> file in our repository. To execute this scipt, use the command <b>bash</b> followed by the path to your script (for us it was in /home/sio-master/) :
+	
+	bash /home/sio-master/script_iptables.sh
+	
+The iptables rules are effective immediately but they won't be effective anymore after a reboot of your master.
+<br>
+To resolve that issue, you can create a service that will launch on StartUp :
+
+	cd /etc/systemd/system/
+	nano script_iptables.service
+	
+Now edit that .service file as such :
+
+	[Unit]
+	Description=Startup   #A simple description of what the service does
+
+	[Service]
+	ExecStart=/home/sio-master/script_iptables.sh   #Executes this script when the system starts
+
+	[Install]
+	WantedBy=default.target
+
+Then enter the following command to be sure that your service will be effective on StartUp:
+
+	systemctl daemon-reload
+	systemctl enable script_iptables.service
+	
+Your script for iptables rules will now execute itself when you restart the master, and your machines inside the subnet will have internet access.
+
 <h2>4- SSH configuration with Password Authentication</h2>
 <p>We want have SSH connection between our Master and their Slaves to remote control them.</p><br>
 To do that, we need to install SSH packages on both Master and Slaves with the command "apt install SSH".
