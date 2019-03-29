@@ -133,7 +133,26 @@ After the install is complete, do a "lxd init" to initialize your lxd. You can l
 
 <p>This is a list of basic LXC commands:<br>
 	
-	[...]
+	Create a container:
+	lxc-launch ubuntu:18.04 mycontainer
+	
+	List existing containers:
+	lxc-ls -f
+	
+	Get information about a container:
+	lxc-info mycontainer
+	
+	Start a container:
+	lxc-start -n mycontainer
+	
+	Stop a container:
+	lxc-stop -n mycontainer
+	
+	Get a shell on the container:
+	lxc-attach -n mycontainer OR lxc exec mycontainer bash
+	
+	Delete a container:
+	lxc-destroy -n mycontainer
 
 <h2>6- Configuring LXD Remote on Master</h2>
 <p>The advantage of LXD is that you can lauch container remotly. It can be very useful if you want to start services from scratch on different computers, as a secundary DHCP server, a WEB server...</p>
@@ -265,10 +284,14 @@ maxretry: define how many fails we autorize before a jail<br></p>
 <p>Now, restart the service and check if it is active:<br>
 	
 	service fail2ban restart
+	
 	fail2ban-client status
-
+	fail2ban-client status
+	Status
+	|- Number of jail:	1
+	`- Jail list:	sshd
 
 
 <h2>10- Configuring PXE/tftpd-hpa to automate installation from scratch</h2>
 <h2>11- Kubernetes Cluster install</h2>
-<h2>12- Ansible: Let's do it again from scratch !</h2>
+<h2>12- Ansible: Let's do it again from scratch!</h2>
