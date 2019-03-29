@@ -43,6 +43,40 @@
 So let's go make your bootable USB key and join us at the second step!</p>
 
 <h2>2- Configuring a DHCP server (on Master) which gives IP address to slaves</h2>
+<p>We want our own subnet where all our machines will be.
+	
+To do so, we'll have to install isc-dhcp-server:
+
+	apt install isc-dhcp-server
+
+Once it is installed, edit the file dhcpd.conf:
+
+	nano /etc/dhcp/dhcpd.conf
+	
+And you can create your own subnet as such :
+
+	subnet 192.168..0 netmask 255.255.255.0 {	#You can change the subnet for your own, as x.x.x.0
+  	range 192.168.100.15 192.168.100.115;
+  	option domain-name-servers 147.99.64.102, 147.99.0.248;	 #DNS addresses
+  	option domain-name "sio.internal.lan";
+  	option subnet-mask 255.255.255.0;
+  	option routers 192.168.100.12;		#The default gateway that'll be used by the machines inside your subnet
+	default-lease-time 600;
+	max-lease-time 7200;
+	}
+	
+We now need to tell the dhcp service on which interface it needs to listen to give ip addresses. To do so, simply configure the file :
+
+	nano /etc/default/isc-dhcp-server
+	
+/!\ WARNING /!\ Be sure that the interface you indicate isn't the one connected to the already existing subnet of the company (such is the case in our context) or the dhcp server will give ip addresses to everybody in the company instead of the machines in your private subnet, causing a loss of internet in the company.<br>
+Add those two lines, indicating the right interface (in our case, the interface connected to our subnet is enp1s0):
+
+	INTERFACESv4="enp1s0"
+	INTERFACESv6="enp1s0"
+	
+You DHCP server will now give an ip to any machine connected on his interface enp1s0.
+
 <h2>3- Configuring iptables to allow Slaves to have Internet access</h2>
 <br>
 <h2>4- SSH configuration with Password Authentication</h2>
