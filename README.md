@@ -284,8 +284,7 @@ maxretry: define how many fails we autorize before a jail<br></p>
 <p>Now, restart the service and check if it is active:<br>
 	
 	service fail2ban restart
-	
-	fail2ban-client status
+		
 	fail2ban-client status
 	Status
 	|- Number of jail:	1
