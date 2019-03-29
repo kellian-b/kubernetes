@@ -108,6 +108,18 @@ Then enter the following command to be sure that your service will be effective 
 	systemctl daemon-reload
 	systemctl enable script_iptables.service
 	
+You also need to allow ipv4 forwarding from the master. Edit the file <b>sysctl.conf</b> to uncomment the line <b>net.ipv4.ip_forward=1</b>:
+
+	nano /etc/sysctl.conf
+	
+From :
+	
+	#net.ipv4.ip_forward=1
+	
+To:
+
+	net.ipv4.ip_forward=1
+	
 Your script for iptables rules will now execute itself when you restart the master, and your machines inside the subnet will have internet access.
 
 <h2>4- SSH configuration with Password Authentication</h2>
@@ -189,7 +201,7 @@ So we have now a remote server defined, we can now launch a container remotly:
 
 	lxc launch ubuntu:18.04 test
 	
-List tje running containers to verify that it works:
+List the running containers to verify that it works:
 
 	lxc list sio-slave2
 	
@@ -293,4 +305,7 @@ maxretry: define how many fails we autorize before a jail<br></p>
 
 <h2>10- Configuring PXE/tftpd-hpa to automate installation from scratch</h2>
 <h2>11- Kubernetes Cluster install</h2>
+
+<p>
+
 <h2>12- Ansible: Let's do it again from scratch!</h2>
