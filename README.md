@@ -69,7 +69,8 @@ We now need to tell the dhcp service on which interface it needs to listen to gi
 
 	nano /etc/default/isc-dhcp-server
 	
-<b> /!\ WARNING /!\ </b> Be sure that the interface you indicate isn't the one connected to the already existing subnet of the company (such is the case in our context) or the dhcp server will give ip addresses to everybody in the company instead of the machines in your private subnet, causing a loss of internet in the company.<br>
+<b> /!\ WARNING /!\ </b><br> 
+Be sure that the interface you indicate isn't the one connected to the already existing subnet of the company (such is the case in our context) or the dhcp server will give ip addresses to everybody in the company instead of the machines in your private subnet, causing a loss of internet in the company.<br>
 Add those two lines, indicating the right interface (in our case, the interface connected to our subnet is enp1s0):
 
 	INTERFACESv4="enp1s0"
@@ -80,7 +81,7 @@ Your DHCP server will now give an ip to any machine connected on his interface e
 <h2>3- Configuring iptables to allow Slaves to have Internet access</h2>
 <br>
 
-To allow the machines inside the subnet to have internet access, we need to add some iptables rules. To do so, we got a script  implamenting several iptables rules : See the <b>script_iptables.sh<b/> file in our repository. To execute this scipt, use the command <b>bash</b> followed by the path to your script (for us it was in /home/sio-master/) :
+To allow the machines inside the subnet to have internet access, we need to add some iptables rules. To do so, we got a script  implamenting several iptables rules : See the <b>script_iptables.sh</b> file in our repository. To execute this scipt, use the command <b>bash</b> followed by the path to your script (for us it was in /home/sio-master/) :
 	
 	bash /home/sio-master/script_iptables.sh
 	
