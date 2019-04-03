@@ -403,7 +403,7 @@ Use the </b>kubectl<b> command to confirm that everything is up and ready :
 	kmaster:~$ kubectl get pods --all-namespaces
 	
 
-<b>ON THE SLAVES :</b>
+<b>ON THE SLAVES : </b>
 
 Use the <i><b>kubeadm join</b></i> command retrieved earlier from the master node to join the Kubernetes cluster :
 
