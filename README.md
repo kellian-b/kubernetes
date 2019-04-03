@@ -364,10 +364,57 @@ First of all, synch the dates and times between the nodes (we have the habit of 
 	apt install ntpdate
 	ntpdate 147.99.64.102
 	
-Next, get the kubernetes packages :
+Next, get the Kubernetes signing key :
 
 	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+	
+Add the Kubernetes repository and install Kubernetes :
 
+	apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+	apt install kubeadm
+	
+We need to disable swap memory on all your nodes (master & slave) because Kubernetes refuses to function on systems using swap memory :
+
+	swappoff -a
+	
+
+<b>ON THE MASTER :</b>
+
+Initialize the Kubernetes :
+
+	root@kmaster:~$ kubeadm init --pod-network-cidr=192.168.0.0/16
+
+The last line of the initialization should be a <i><b>kubeadm join</b></i> command like this one :
+
+<b>kubeadm join 192.168.100.82:6443 --token qh53oq.hdi9qduevp98qsdf --discovery-token-ca-cert-hash    	sha256:2cdb9046232ae3ab1f7f5186a548c88e37bf65a72ef0dd99dd1a0504db55c4e2</b>
+
+Execute the following commands to start using the Kubernetes cluster :
+
+	mkdir -p $HOME/.kube
+	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+	sudo chown $(id -u):$(id -g) $HOME/.kube/config
+	
+Deploy a pod network :
+
+	kmaster:~$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+Use the </b>kubectl<b> command to confirm that everything is up and ready :
+
+	kmaster:~$ kubectl get pods --all-namespaces
+	
+
+<b>ON THE SLAVES :</b>
+
+Use the <i><b>kubeadm join</b></i> command retrieved earlier from the master node to join the Kubernetes cluster :
+
+	kslave1:~$ kubeadm join 192.168.100.82:6443 --token qh53oq.hdi9qduevp98qsdf --discovery-token-ca-cert-hash    	sha256:2cdb9046232ae3ab1f7f5186a548c88e37bf65a72ef0dd99dd1a0504db55c4e2
+	
+
+The slave should now have joined the Kubernetes cluster. To verify if it did, execute the following command on the master node :
+
+	kmaster:~$ kubectl get nodes
+	
+	
 
 <h2>12- Ansible: Let's do it again from scratch!</h2>
 
