@@ -308,7 +308,7 @@ maxretry: define how many fails we autorize before a jail<br></p>
 <h2>10- Configuring PXE/tftpd-hpa to automate installation from scratch</h2>
 <h2>11- Kubernetes Cluster install</h2>
 
-<p>First of all, we need to install Docker with a validated version for Kubernetes.<br>
+<p>First of all, we need to install Docker with a validated version for Kubernetes on <b>ALL</b> of the nodes that will use Kubernetes.<br>
 	
 <b>Step 1 : Installing Docker</b>
 
@@ -346,6 +346,28 @@ Install the version 18.06.0~ce~3-0~ubuntu which is validated by Kubernetes.
 Verify that Docker CE is installed correctly by running the hello-world image.
 
 	sudo docker run hello-world
+	
+Then enable docker in the system :
+
+	systemctl enable docker
+	
+	
+
+<b>Step 2 : Installing and Configuring Kubernetes</b>
+
+You will have two types of nodes : 1 Master which we will name <b>kmaster</b> and 1 or 2 Slaves named <b>kslave1</b> and <b>kslave2</b>.
+
+The aim is to launch docker containers on the slaves from the master. To do so, we have to enter some commands on both <b>ALL</b> the nodes :
+
+First of all, synch the dates and times between the nodes (we have the habit of using ntpdate). If you don't do it, you will encounter several errors. Synch the time with the DNS server:
+
+	apt install ntpdate
+	ntpdate 147.99.64.102
+	
+Next, get the kubernetes packages :
+
+	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+
 
 <h2>12- Ansible: Let's do it again from scratch!</h2>
 
