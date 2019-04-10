@@ -441,7 +441,7 @@ You can get the current services :
 	
 Verify that the NGINX deployment is successful by using curl on the slave node:
 
-	kmaster:~$ curl kube-worker-1:32***
+	kmaster:~$ curl kslave1:32***
 	
 The outpout will show the unerndered "Welcome to nginx!" html page
 
