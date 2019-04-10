@@ -405,7 +405,7 @@ Use the </b>kubectl<b> command to confirm that everything is up and ready :
 
 <b>ON THE SLAVES : </b>
 
-Use the <i><b>kubeadm join</b></i> command retrieved earlier from the master node to join the Kubernetes cluster :
+Use the <i> <b> kubeadm join </b> </i> command retrieved earlier from the master node to join the Kubernetes cluster :
 
 	kslave1:~$ kubeadm join 192.168.100.82:6443 --token qh53oq.hdi9qduevp98qsdf --discovery-token-ca-cert-hash    	sha256:2cdb9046232ae3ab1f7f5186a548c88e37bf65a72ef0dd99dd1a0504db55c4e2
 	
@@ -414,7 +414,37 @@ The slave should now have joined the Kubernetes cluster. To verify if it did, ex
 
 	kmaster:~$ kubectl get nodes
 	
+
+<b> Deploy NGINX on the Kubernetes Cluster to test things out : </b>
+
+From the master node <i> <b> kubectl create </b> </i> an nginx deployment :
+
+	kmaster:~$ kubectl create deployment nginx --image=nginx
 	
+You can list all available deployments with :
+
+	kmaster:~$ kubectl get deployments
+
+For more information :
+
+	kmaster:~$ kubectl describe deployment nginx
+	
+Then, make the NGINX container accessible via internet:
+
+	kmaster:~$ kubectl create service nodeport nginx --tcp=80:80
+
+This creates a public facing service on the host for the NGINX deployment. Because this is a nodeport deployment, kubernetes will assign this service a port on the host machine in the 32000+ range.
+
+You can get the current services :
+
+	kmaster:~$ kubectl get svc
+	
+Verify that the NGINX deployment is successful by using curl on the slave node:
+
+	kmaster:~$ curl kube-worker-1:32***
+	
+The outpout will show the unerndered "Welcome to nginx!" html page
+
 
 <h2>12- Ansible: Let's do it again from scratch!</h2>
 
