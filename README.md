@@ -398,7 +398,7 @@ Deploy a pod network :
 
 	kmaster:~$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
-Use the </b>kubectl<b> command to confirm that everything is up and ready :
+Use the <b>kubectl</b> command to confirm that everything is up and ready :
 
 	kmaster:~$ kubectl get pods --all-namespaces
 	
