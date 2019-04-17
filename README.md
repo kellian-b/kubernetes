@@ -255,7 +255,7 @@ Now check that your container has recovered an address from your DHCP: <br></p>
 <br>
 <b>Fist method: Changing the container's configuration</b><br>
 
-To have a fixed ip address on your container, you need to stop the container, then change its configuration :
+<p>To have a fixed ip address on your container, you need to stop the container, then change its configuration :
 
 	lxc stop mycontainer
 	lxc network attach lxdbr0 c1 eth0 eth0
@@ -268,7 +268,7 @@ Then when you type the following command, you should have the address you config
 	
 Your container now as for its ip the one you configured.
 
-
+</p>
 <b>Second method: On container launch</b><br>
 
 In your dhcp configuration, add the following lines choosing a custom MAC address that will identify your container, and you associate it to a fixed ip address. Add in <i>/etc/dhcp/dhcpd.conf</i> :
