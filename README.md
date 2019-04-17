@@ -253,7 +253,7 @@ Now check that your container has recovered an address from your DHCP: <br></p>
 <br>
 <b>How to get a fixed ip address :</b><br>
 <br>
-<b>Fist method: Changing the container's configuration</b>
+<b>Fist method: Changing the container's configuration</b><br>
 
 To have a fixed ip address on your container, you need to stop the container, then change its configuration :
 
