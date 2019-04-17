@@ -255,7 +255,8 @@ Now check that your container has recovered an address from your DHCP: <br></p>
 <br>
 <b>Fist method: Changing the container's configuration</b><br>
 
-<p>To have a fixed ip address on your container, you need to stop the container, then change its configuration :
+<p>
+<br>To have a fixed ip address on your container, you need to stop the container, then change its configuration :
 
 	lxc stop mycontainer
 	lxc network attach lxdbr0 c1 eth0 eth0
@@ -270,8 +271,7 @@ Your container now as for its ip the one you configured.
 
 </p>
 <b>Second method: On container launch</b><br>
-
-In your dhcp configuration, add the following lines choosing a custom MAC address that will identify your container, and you associate it to a fixed ip address. Add in <i>/etc/dhcp/dhcpd.conf</i> :
+<p><br>In your dhcp configuration, add the following lines choosing a custom MAC address that will identify your container, and you associate it to a fixed ip address. Add in <i>/etc/dhcp/dhcpd.conf</i> :
 
 	host mycontainer { hardware ethernet 00:16:3e:aa:aa:01; fixed-address 192.168.100.64; }
 	
@@ -281,6 +281,7 @@ Then when you launch your container, add the configuration input as such :
 	
 Your container will have the ip and hardware address you configured in your <i>dhcpd.conf</i> file.  
 
+</p>
 <h2>8- SSH configuration with PubKey Authentication</h2>
 <p>We are now tired of having to enter a password each time we connect to SSH. We will therefore disable password authentication and configure key authentication.</p>
 We have chosen to use rsa key because it is more secure.
