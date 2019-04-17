@@ -263,7 +263,7 @@ Now check that your container has recovered an address from your DHCP: <br></p>
 	lxc config device set mycontainer eth0 ipv4.address 192.168.100.64
 	lxc start mycontainer
 	
-Then when you type the following command, you should have the address you configured as output (even thought when you input <i>lxc list</i> or when you enter you container and type in <i>ip a</i> the ip address will not be the one you configured):
+Then when you type the following command, you should have the address you configured as output (even thought when you input <i>"lxc list"</i> or when you enter you container and type in <i>"ip a"</i> the ip address will not be the one you configured):
 
 	lxc config device get mycontainer eth0 ipv4.address
 	
@@ -271,7 +271,7 @@ Your container now as for its ip the one you configured.
 
 </p>
 <b>Second method: On container launch</b><br>
-<p><br>In your dhcp configuration, add the following lines choosing a custom MAC address that will identify your container, and you associate it to a fixed ip address. Add in <i>/etc/dhcp/dhcpd.conf</i> :
+<p><br>In your dhcp configuration, add the following lines choosing a custom MAC address that will identify your container, and you associate it to a fixed ip address. Add in <i>"/etc/dhcp/dhcpd.conf"</i> :
 
 	host mycontainer { hardware ethernet 00:16:3e:aa:aa:01; fixed-address 192.168.100.64; }
 	
