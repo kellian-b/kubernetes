@@ -249,6 +249,37 @@ We create the container "test" and attach it the "lanprofile" profile:<br>
 Now check that your container has recovered an address from your DHCP: <br></p>
 
 	lxc exec test ip route
+	
+<br>
+<b>How to get a fixed ip address :</b>
+<br>
+
+<b>Fist method: Changing the container's configuration</b>
+To have a fixed ip address on your container, you need to stop the container, then change its configuration :
+
+	lxc stop mycontainer
+	lxc network attach lxdbr0 c1 eth0 eth0
+	lxc config device set mycontainer eth0 ipv4.address 192.168.100.64
+	lxc start mycontainer
+	
+Then when you type the following command, you should have the address you configured as output (even thought when you input <i>lxc list</i> or when you enter you container and type in <i>ip a</i> the ip address will not be the one you configured):
+
+	lxc config device get mycontainer eth0 ipv4.address
+	
+Your container now as for its ip the one you configured.
+
+<br>
+<b>Second method: On container launch</b>
+
+In your dhcp configuration, add the following lines choosing a custom MAC address that will identify your container, and you associate it to a fixed ip address. Add in <i>/etc/dhcp/dhcpd.conf</i> :
+
+	host mycontainer { hardware ethernet 00:16:3e:aa:aa:01; fixed-address 192.168.100.64; }
+	
+Then when you launch your container, add the configuration input as such :
+
+	lxc launch -p lanprofile ubuntu:18.04 -c volatile.eth0.hwaddr=00:16:3e:aa:aa:01 mycontainer
+	
+Your container will have the ip and hardware address you configured in your <i>dhcpd.conf</i> file.  
 
 <h2>8- SSH configuration with PubKey Authentication</h2>
 <p>We are now tired of having to enter a password each time we connect to SSH. We will therefore disable password authentication and configure key authentication.</p>
