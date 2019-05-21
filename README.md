@@ -201,7 +201,7 @@ You can then list your remotes and you'll see "sio-slave2" listed there:<br>
 	
 So we have now a remote server defined, we can now launch a container remotly:
 
-	lxc launch ubuntu:18.04 test
+	lxc launch ubuntu:18.04 sio-slave2:test
 	
 List the running containers to verify that it works:
 
