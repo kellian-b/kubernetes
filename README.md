@@ -259,7 +259,7 @@ Now check that your container has recovered an address from your DHCP: <br></p>
 <br>To have a fixed ip address on your container, you need to stop the container, then change its configuration :
 
 	lxc stop mycontainer
-	lxc network attach lxdbr0 c1 eth0 eth0
+	lxc network attach lxdbr0 mycontainer eth0 eth0
 	lxc config device set mycontainer eth0 ipv4.address 192.168.100.64
 	lxc start mycontainer
 	
