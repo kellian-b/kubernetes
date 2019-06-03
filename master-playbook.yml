@@ -67,7 +67,7 @@
 ###### BRUTEFORCE PROTECTION ######
 
     - name: Configuring bruteforce protection (fail2ban)
-      command: scp root@147.9965.180:/etc/ansible/templates/fail2ban.template . #Downloading template from an external computer
+      command: scp root@147.99.65.180:/etc/ansible/templates/fail2ban.template . #Downloading template from an external computer
     
     - name: Moving file in the good directory
       command: mv fail2ban.template /etc/fail2ban/jail.d/custom.conf
