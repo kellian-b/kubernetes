@@ -1,0 +1,98 @@
+---
+
+#FROM SCRATCH INSTALL
+#A basic installation, which configures a master of 3 other computers
+#Network configuration, SSH connexion, DHCP server, LXD configuration, LXD Remote configuration 
+
+- name: Master Installation
+  hosts: master  #group "master" is declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+###### PACKAGES INSTALL ######
+
+  tasks:
+    - name: Package Installation
+      apt: name={{ item }} update_cache=yes  state=latest #updating versions or installing the last one
+      with_items: #apt install (package)
+        - isc-dhcp-server 
+        - ssh
+        - lxd
+        - python3-lxc
+        - lxc-utils
+        - lxctl
+        - htop
+        - bridge-utils
+        - libvirt-bin
+        - debootstrap
+        - ifupdown
+        - net-tools
+        - ntpdate
+        - nmap
+        - git
+       
+###### DHCP CONFIGURATION ######
+    
+    - name: Configuring the DHCP server           
+      command: cd /etc/dhcp #changing directory
+      command: scp root@147.99.65.180:/etc/ansible/templates/dhcpd.conf.template . #Downlaod the template which is on an external computer
+
+    - name: Checking if 'dhcpd.conf' exists
+      stat:
+       path: /etc/dhcp/ dhcpd.conf.template
+      register: stat_result
+
+    - name: Renaming dhcpd.conf.template
+      command: mv /etc/dhcp/dhcpd.conf.template /etc/dhcp/dhcpd.conf #our template become the principal configuration file
+      when: stat_result.stat.exists == True
+
+###### IPTABLES CONFIGURATION ######
+
+    - name: Downloading iptables template
+      command: scp root@147.99.65.180:/etc/ansible/templates/script_iptables.sh.template . #Downloading template from our external computer
+
+    - name: Renaming iptables.sh template
+      command: mv script_iptables.sh.template /home/sio-master/script_iptables.sh #moving the template in the good directory
+
+    - name: Downloading iptables script
+      command: scp root@147.99.65.180:/etc/ansible/templates/script_iptables.service.template . #Downloading the template of iptables script
+     
+    - name: Renaming iptables.service template
+      command: mv script_iptables.service.template /etc/systemd/system/script_iptables.service #Moving the downloaded template in the good directory
+
+    - name: Converting a typicall upstart job to a systemd one #apply iptables changes
+      command: systemctl daemon-reload
+      command: systemctl enable script_iptables.service
+      command: systemctl enable script_iptables
+
+###### BRUTEFORCE PROTECTION ######
+
+    - name: Configuring bruteforce protection (fail2ban)
+      command: scp root@147.99.65.180:/etc/ansible/templates/fail2ban.template . #Downloading template from an external computer
+    
+    - name: Moving file in the good directory
+      command: mv fail2ban.template /etc/fail2ban/jail.d/custom.conf
+
+    - name: Restarting fail2ban service
+      command: service fail2ban restart
+
+###### LXC REMOTE CONFIGURATION ######
+
+    - name: Listen on the 8443 port for remote launch of container
+      command: lxc config set core.https_address [::]:8443
+      
+###### SSH PUBKEY CONFIGURATION ######
+
+    - name: Creating and sharing an SSH Key
+      command: ssh-keygen -t rsa #Creating a encrypted key
+      command: ssh-copy-id 192.168.100.23 #sending the key to the first slave (static ip)
+      command: ssh-copy-id 192.168.100.26 #sending the key to the second slave (static ip)
+      command: ssh-copy-id 192.168.100.48 #sending the key to the third slave (static ip)
+      command: service ssh restart #restarting ssh
+      command: service sshd restart #restarting sshd 
+
+###### NETWORK RESTART  ######
+
+    - name: Restarting networking/dhcp services
+      command: service isc-dhcp-server restart
+      command: service networking restart       
+...
