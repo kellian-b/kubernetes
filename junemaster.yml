@@ -32,6 +32,7 @@
         - portmap
         - nis
         - nfs-kernel-server
+        - x11-apps
        
 ###### DHCP CONFIGURATION ######
     
