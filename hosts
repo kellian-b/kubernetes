@@ -21,14 +21,14 @@
 #192.168.1.100
 #192.168.1.110
 [slaves]
-192.168.100.74
+192.168.150.101
 
 [slaves:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 [master]
 #Master ip
-192.168.100.12
+192.168.150.199
 #Use python3
 [master:vars]
 ansible_python_interpreter=/usr/bin/python3
