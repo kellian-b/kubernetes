@@ -33,6 +33,7 @@
         - nis
         - nfs-kernel-server
         - x11-apps
+        - openjdk-11-jre
        
 ###### DHCP CONFIGURATION ######
     
