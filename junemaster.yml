@@ -114,7 +114,6 @@
     - name: Restarting NIS service
       command: service rpcbind restart
 
-
 ###### LXC REMOTE CONFIGURATION ######
 
     - name: Listen on the 8443 port for remote launch of container
@@ -138,7 +137,6 @@
 
     - name: Restarting system services
       command: systemctl daemon-reload
-
 
 ###### SSH PUBKEY CONFIGURATION ######
 
