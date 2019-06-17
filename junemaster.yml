@@ -29,20 +29,23 @@
         - ntpdate
         - nmap
         - git
+        - portmap
+        - nis
+        - nfs-kernel-server
        
 ###### DHCP CONFIGURATION ######
     
     - name: Configuring the DHCP server           
       command: cd /etc/dhcp #changing directory
-      command: scp root@147.99.65.180:/etc/ansible/templates/dhcpd.conf.template . #Downlaod the template which is on an external computer
+      command: scp root@147.99.65.180:/etc/ansible/templates/dhcpd.conf.june.template . #Downlaod the template which is on an external computer
 
     - name: Checking if 'dhcpd.conf' exists
       stat:
-       path: /etc/dhcp/ dhcpd.conf.template
+       path: /etc/dhcp/ dhcpd.conf.june.template
       register: stat_result
 
     - name: Renaming dhcpd.conf.template
-      command: mv /etc/dhcp/dhcpd.conf.template /etc/dhcp/dhcpd.conf #our template become the principal configuration file
+      command: mv /etc/dhcp/dhcpd.conf.june.template /etc/dhcp/dhcpd.conf #our template become the principal configuration file
       when: stat_result.stat.exists == True
 
 ###### IPTABLES CONFIGURATION ######
@@ -68,25 +71,82 @@
 
     - name: Configuring bruteforce protection (fail2ban)
       command: scp root@147.99.65.180:/etc/ansible/templates/fail2ban.template . #Downloading template from an external computer
-    
+
     - name: Moving file in the good directory
       command: mv fail2ban.template /etc/fail2ban/jail.d/custom.conf
 
     - name: Restarting fail2ban service
       command: service fail2ban restart
 
+###### NFS CONFIGURATION ######
+
+    - name: Configuring NFS server
+      command: scp root@147.99.65.180:/etc/ansible/templates/exports.june.template . #Downloading template from an external computer
+      command: mkdir -p /mnt/sharedfolder #Creating the folder that the server will share with the clients
+      command: sudo chown nobody:nogroup /mnt/sharedfolder
+      command: sudo chmod 777 /mnt/sharedfolder
+      
+    - name: Moving file in the good directory
+      command: mv /etc/exports /etc/exports.bckp #Renaming existing file to avoid conflicts
+      command: mv exports.june.template /etc/exports
+
+    - name: Sharing the folder
+      command: exportfs -rav #VERY important step
+
+    - name: Restarting NFS service
+      command: systemctl restart nfs-kernel-server
+
+###### YELLOW PAGES (NIS) CONFIGURATION ######
+
+    - name: Configuring Yellow Pages client (NIS)
+      command: scp root@147.99.65.180:/etc/ansible/templates/yp.conf.june.template . #Downloading template from an external computer
+      command: scp root@147.99.65.180:/etc/ansible/templates/nsswitch.conf.june.template .
+      command: scp root@147.99.65.180:/etc/ansible/templates/common-session.june.template .
+    
+    - name: Moving file in the good directory
+      command: mv /etc/yp.conf /etc/yp.conf.bckp #Renaming existing file to avoid conflicts
+      command: mv yp.conf.june.template /etc/yp.conf #Moving in new file
+      command: mv /etc/nsswitch.conf /etc/nsswitch.conf.bckp
+      command: mv nsswitch.conf.june.template /etc/nsswitch.conf
+      command: mv /etc/pam.d/common-session /etc/pam.d/common-session.bckp
+      command: mv common-session.june.template /etc/pam.d/common-session
+
+    - name: Restarting NIS service
+      command: service rpcbind restart
+
+
 ###### LXC REMOTE CONFIGURATION ######
 
     - name: Listen on the 8443 port for remote launch of container
       command: lxc config set core.https_address [::]:8443
       
+###### APPARMOR CONFIGURATION ######
+
+    - name: Configuring apparmor files
+      command: scp root@147.99.65.180:/etc/ansible/templates/lxc-default.june.template . #Downloading template from an external computer
+      command: scp root@147.99.65.180:/etc/ansible/templates/lxc-default-cgns.june.template .
+      
+    - name: Moving file in the good directory
+      command: mv /etc/apparmor.d/lxc/lxc-default /etc/apparmor.d/lxc/lxc-default.bckp #Renaming existing file to avoid conflicts
+      command: mv lxc-default.june.template /etc/apparmor.d/lxc/lxc-default
+      command: mv /etc/apparmor.d/lxc/lxc-default-cgns /etc/apparmor.d/lxc/lxc-default-cgns.bckp
+      command: mv lxc-default-cgns.june.template /etc/apparmor.d/lxc/lxc-default-cgns
+
+    - name: Destroying apparmor to avoid conflicts within the containers
+      command: /etc/init.d/apparmor teardown
+      command: update-rc.d -f apparmor remove
+
+    - name: Restarting system services
+      command: systemctl daemon-reload
+
+
 ###### SSH PUBKEY CONFIGURATION ######
 
     - name: Creating and sharing an SSH Key
       command: ssh-keygen -t rsa #Creating a encrypted key
-      command: ssh-copy-id 192.168.100.23 #sending the key to the first slave (static ip)
-      command: ssh-copy-id 192.168.100.26 #sending the key to the second slave (static ip)
-      command: ssh-copy-id 192.168.100.48 #sending the key to the third slave (static ip)
+      command: ssh-copy-id 192.168.150.101 #sending the key to the first slave (static ip)
+#      command: ssh-copy-id 192.168.100.26 #sending the key to the second slave (static ip)
+#      command: ssh-copy-id 192.168.100.48 #sending the key to the third slave (static ip)
       command: service ssh restart #restarting ssh
       command: service sshd restart #restarting sshd 
 
