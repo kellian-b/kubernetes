@@ -1,0 +1,102 @@
+---
+#FROM SCRATCH INSTALL
+#A basic install for 3 slaves computers
+
+- name: Package Installation
+  hosts: slaves  #group "slaves" is declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+  tasks:
+    - name: Package Installation
+      apt: name={{ item }} update_cache=yes  state=latest #apt update & last version installed
+      with_items: #apt install x
+        - ssh
+        - lxd
+        - python3-lxc
+        - lxc-utils
+        - lxctl
+        - htop
+        - bridge-utils
+        - libvirt-bin
+        - debootstrap
+        - ifupdown
+        - net-tools
+        - ntpdate
+        - nmap
+        - git
+        - nfs-common
+       
+    - name: NIS automatic install
+      apt:
+        name: nis
+        update_cache: yes
+        dpkg_options: 'force-confold,force-confdef'
+
+##### NIS CLIENT CONFIGURATION #####
+
+## Default Domain ##
+    - name: Changing the domain name
+      command: scp 192.168.150.199:/etc/ansible/templates/defaultdomain.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/defaultdomain /etc/defaultdomain.bkp
+
+    - name: Placing the new one
+      command: mv /etc/defaultdomain.template /etc/defaultdomain
+
+## Default Domain ##
+    - name: Changing the domain name
+      command: scp 192.168.150.199:/etc/ansible/templates/yp.conf.june.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/yp.conf /etc/yp.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/yp.conf.june.template /etc/yp.conf
+
+## nsswitch file ##
+
+    - name: Changing the nsswitch file
+      command: scp 192.168.150.199:/etc/ansible/templates/nsswitch.conf.june.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/nsswitch.conf /etc/nsswitch.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/nsswitch.conf.june.template /etc/nsswitch.conf
+
+## common-session file ##
+
+    - name: Changing the common-session file
+      command: scp 192.168.150.199:/etc/ansible/templates/common-session.june.template /etc/pam.d/
+
+    - name: Moving the old file
+      command: mv /etc/pam.d/common-session /etc/pam.d/common-session.bkp
+
+    - name: Placing the new one
+      command: mv /etc/pam.d/common-session.june.template /etc/pam.d/common-session
+
+    - name: binding the server
+      command: ypbind
+
+##### LXC CONFIGURATION #####
+
+    - name: Listen on the 8443 port for LXC Remote
+      command: lxc config set core.https_address [::]:8443
+      command: lxc config set core.trust_password toto
+      command: lxc config device set default eth0 parent enp1s0 
+      command: lxc config device set default eth0 nictype macvlan
+
+##### NFS CLIENT CONFIGURATION #####
+
+    - name: Creating the mountfolder directory
+      command: sudo mount -t nfs -o nfsvers=3 147.99.64.109:/home /home
+
+    - name: NFS mount on the LXC containers
+      command: lxc profile device add default home disk source=/home path=/home
+
+    - name: Service restarts
+      command: service lxd restart
+      command: systemctl restart rpcbind nis
+
+...

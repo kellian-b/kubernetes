@@ -1,0 +1,77 @@
+---
+
+- name: Yellow Pages Server Installation
+  hosts: ypsrv  #group  is declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+##### PACKAGES INSTALLATION #####
+
+  tasks:
+    - name: Package Installation
+      apt: name={{ item }} update_cache=yes  state=latest #updating versions or installing the last one
+      with_items: #apt install (package) 
+        - ssh
+        - htop
+        - libvirt-bin
+        - debootstrap
+        - ifupdown
+        - net-tools
+        - ntpdate
+        - nmap
+        - git
+        - portmap
+       
+##### NIS AUTOMATED INSTALL #####
+
+#    - name: Automated NIS Package Installation to skip the dialog
+#      command: export DEBIAN_FRONTEND=noninteractive
+
+    - name: Pass options
+      apt:
+        name: nis
+        update_cache: yes
+        dpkg_options: 'force-confold,force-confdef'
+
+##### YELLOW PAGES (NIS) SERVER CONFIGURATION #####
+
+    - name: Changing the domain name    
+      command: scp 192.168.150.199:/etc/ansible/templates/defaultdomain.template root@192.168.150.113:/etc/
+
+    - name: Moving the old file
+      command: mv /etc/defaultdomain /etc/defaultdomain.bkp
+
+    - name: Placing the new one
+      command: mv /etc/defaultdomain.template /etc/defaultdomain
+
+    - name: Old NIS
+      command: mv /etc/default/nis /etc/default/nis.bkp
+
+    - name: importing new NIS
+      command: scp root@192.168.150.199:/etc/ansible/templates/nis.template root@192.168.150.113:/etc/default
+
+    - name: New NIS
+      command: mv /etc/default/nis.template /etc/default/nis
+
+    - name: Securenets
+      command: mv /etc/ypserv.securenets ypserv.securenets.bkp
+
+    - name: Importing new Securenets
+      command: scp root@192.168.150.199:/etc/ansible/templates/ypserv.securenets.template /etc/
+
+    - name: Placing new Securents
+      command: mv /etc/ypserv.securenets.template /etc/ypserv.securenets
+
+    - name: Importing new hosts file
+      command: scp root@192.168.150.199:/etc/ansible/templates/yp-srv-hosts.template /etc/
+
+    - name: Renaming old hosts file
+      command: mv /etc/hosts /etc/hosts.bkp
+
+    - name: Placing new hosts file
+      command: mv /etc/yp-srv-hosts.template /etc/hosts
+
+    - name: initializing Yellow Pages
+      command: /usr/lib/yp/ypinit -m
+
+    - name: Restarting the service
+      command: systemctl restart nis
