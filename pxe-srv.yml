@@ -1,0 +1,126 @@
+---
+- name: Package Installation
+  hosts: pxe declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+  tasks:
+    - name: Packages install
+      apt: name={{ item }} update_cache=yes  state=latest #updating versions or installing the last one
+      with_items: #apt install (package)
+        - ssh
+        - htop
+        - libvirt-bin
+        - debootstrap
+        - ifupdown
+        - net-tools
+        - ntpdate
+        - nmap
+        - git
+        - portmap
+        - apache2
+        - inetutils-inetd
+        - tftpd-hpa
+
+    - name: NIS automatic install
+      apt:
+        name: nis
+        update_cache: yes
+        dpkg_options: 'force-confold,force-confdef'
+
+##### PXE CONFIGURATION #####
+
+## tftpd-hpa file ##
+    - name: Changing the tftpd-hpa default config
+      command: scp root@192.168.150.199:/etc/ansible/templates/tftpd-hpa.template /etc/default/
+
+    - name: Moving the old file
+      command: mv /etc/default/tftpd-hpa /etc/default/tftpd-hpa.bkp
+
+    - name: Placing the new one
+      command: mv /etc/default/tftpd-hpa.template /etc/default/tftpd-hpa
+
+## inetd.conf file ##
+    - name: Changing inetd.conf config
+      command: scp root@192.168.150.199:/etc/ansible/templates/inetd.conf.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/inetd.conf /etc/inetd.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/inetd.conf.template /etc/inetd.conf
+
+    - name: Restarting the service
+      command: systemctl restart tftpd-hpa
+
+## tftpboot files ##
+    - name: Changing the tftpboot files
+      command: scp -r root@192.168.150.199:/etc/ansible/templates/tftpboot.template /var/lib/
+
+    - name: Moving the old file
+      command: mv -r /var/lib/tftpboot /var/lib/tftpboot.bkp
+
+    - name: Placing the new one
+      command: mv -r /var/lib/tftpboot.template /var/lib/tftpboot
+
+## html ubuntu files ##
+    - name: Adding the ubuntu directory
+      command: scp -r root@192.168.150.199:/etc/ansible/templates/html.ubuntu.template /var/www/html/
+
+    - name: Renaming the directory
+      command: mv -r /var/www/html/html.ubuntu.template /var/www/html/ubuntu
+
+## html preseed files ##
+    - name: Adding the preseed directory
+      command: scp -r root@192.168.150.199:/etc/ansible/templates/html.preseed.template /var/www/html/
+
+    - name: Renaming the directory
+      command: mv -r /var/www/html/html.preseed.template /var/www/html/preseed
+
+##### NIS CONFIGURATION #####
+
+## Default Domain ##
+    - name: Changing the domain name
+      command: scp 192.168.150.199:/etc/ansible/templates/defaultdomain.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/defaultdomain /etc/defaultdomain.bkp
+
+    - name: Placing the new one
+      command: mv /etc/defaultdomain.template /etc/defaultdomain
+
+## yp configuration file ##
+    - name: Changing the yp.conf file
+      command: scp 192.168.150.199:/etc/ansible/templates/yp.conf.june.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/yp.conf /etc/yp.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/yp.conf.june.template /etc/yp.conf
+## nsswitch file ##
+
+    - name: Changing the nsswitch file
+      command: scp 192.168.150.199:/etc/ansible/templates/nsswitch.conf.june.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/nsswitch.conf /etc/nsswitch.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/nsswitch.conf.june.template /etc/nsswitch.conf
+
+## common-session file ##
+
+    - name: Changing the common-session file
+      command: scp 192.168.150.199:/etc/ansible/templates/common-session.june.template /etc/pam.d/
+
+    - name: Moving the old file
+      command: mv /etc/pam.d/common-session /etc/pam.d/common-session.bkp
+
+    - name: Placing the new one
+      command: mv /etc/pam.d/common-session.june.template /etc/pam.d/common-session
+
+## binding ##
+
+    - name: binding the server
+      command: ypbind
+...
