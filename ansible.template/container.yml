@@ -1,0 +1,27 @@
+---
+- name: Master Installation
+  hosts: master  #group "master" is declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+  tasks:
+    - name: Creating a container
+      command: lxc launch ubuntu:18.04 -c security.privileged="true" -c volatile.eth0.hwaddr=00:16:3e:dd:dd:04 ansitest
+      
+    - name: Getting inside the container
+      command: lxc exec ansitest bash
+
+##### SSH CONFIGURATION #####
+
+    - name: Changing the root login configuration
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: '^(.*)PermitRootLogin prohibit-password(.*)$'
+        replace: 'PermitRootLogin yes'
+
+    - name: Changing the password authentification
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: '^(.*)PasswordAuthentication no(.*)$'
+        replace: 'PasswordAuthentication yes'
+
+

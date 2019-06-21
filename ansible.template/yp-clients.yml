@@ -1,0 +1,62 @@
+---
+- name: Package Installation
+  hosts: all:!yp-srv  #group "slaves" is declared in the 'hosts' file
+  remote_user: root #ansible connexion used the "root" user
+
+##### NIS CLIENT CONFIGURATION #####
+
+  tasks:
+    - name: NIS automatic install
+      apt:
+        name: nis
+        update_cache: yes
+        dpkg_options: 'force-confold,force-confdef'
+
+## Default Domain ##
+    - name: Changing the domain name
+      command: scp 192.168.150.199:/etc/ansible/templates/defaultdomain.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/defaultdomain /etc/defaultdomain.bkp
+
+    - name: Placing the new one
+      command: mv /etc/defaultdomain.template /etc/defaultdomain
+
+## yp configuration file ##
+    - name: Changing the yp.conf file
+      command: scp 192.168.150.199:/etc/ansible/templates/yp.conf.june.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/yp.conf /etc/yp.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/yp.conf.june.template /etc/yp.conf
+
+## nsswitch file ##
+
+    - name: Changing the nsswitch file
+      command: scp 192.168.150.199:/etc/ansible/templates/nsswitch.conf.june.template /etc/
+
+    - name: Moving the old file
+      command: mv /etc/nsswitch.conf /etc/nsswitch.conf.bkp
+
+    - name: Placing the new one
+      command: mv /etc/nsswitch.conf.june.template /etc/nsswitch.conf
+
+## common-session file ##
+
+    - name: Changing the common-session file
+      command: scp 192.168.150.199:/etc/ansible/templates/common-session.june.template /etc/pam.d/
+
+    - name: Moving the old file
+      command: mv /etc/pam.d/common-session /etc/pam.d/common-session.bkp
+
+    - name: Placing the new one
+      command: mv /etc/pam.d/common-session.june.template /etc/pam.d/common-session
+
+##### SERVICES RESTARTS #####
+
+    - name: binding the server
+      command: ypbind
+...
+
