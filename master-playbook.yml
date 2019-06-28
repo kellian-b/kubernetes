@@ -1,19 +1,13 @@
 ---
-
-#FROM SCRATCH INSTALL
-#A basic installation, which configures a master of 3 other computers
-#Network configuration, SSH connexion, DHCP server, LXD configuration, LXD Remote configuration 
-
 - name: Master Installation
   hosts: master  #group "master" is declared in the 'hosts' file
   remote_user: root #ansible connexion used the "root" user
-
-###### PACKAGES INSTALL ######
+  
 
   tasks:
     - name: Package Installation
-      apt: name={{ item }} update_cache=yes  state=latest #updating versions or installing the last one
-      with_items: #apt install (package)
+      apt: name={{ item }} update_cache=yes  state=latest #apt update & last version installed
+      with_items: #apt install x
         - isc-dhcp-server 
         - ssh
         - lxd
@@ -29,70 +23,109 @@
         - ntpdate
         - nmap
         - git
-       
+        - ansible
+        - nfs-kernel-server
+
 ###### DHCP CONFIGURATION ######
-    
-    - name: Configuring the DHCP server           
-      command: cd /etc/dhcp #changing directory
-      command: scp root@147.99.65.180:/etc/ansible/templates/dhcpd.conf.template . #Downlaod the template which is on an external computer
 
-    - name: Checking if 'dhcpd.conf' exists
-      stat:
-       path: /etc/dhcp/ dhcpd.conf.template
-      register: stat_result
+    - name: DHCP configuration
+      become: yes
+      copy:
+        src: /etc/ansible/templates/dhcp.conf.june.template
+        dest: /etc/dhcp
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Renaming dhcpd.conf.template
-      command: mv /etc/dhcp/dhcpd.conf.template /etc/dhcp/dhcpd.conf #our template become the principal configuration file
-      when: stat_result.stat.exists == True
+    - name: Setting up the DHCP default file
+      become: yes
+      copy:
+        src: /etc/ansible/templates/isc-dhcp-server.template
+        dest: /etc/default/isc-dhcp-server
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
 ###### IPTABLES CONFIGURATION ######
 
-    - name: Downloading iptables template
-      command: scp root@147.99.65.180:/etc/ansible/templates/script_iptables.sh.template . #Downloading template from our external computer
+    - name: Configuring iptables script
+      become: yes
+      copy:
+        src: /etc/ansible/templates/script_iptables.sh.template
+        dest: /home/master/script_iptables.sh
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Renaming iptables.sh template
-      command: mv script_iptables.sh.template /home/sio-master/script_iptables.sh #moving the template in the good directory
+    - name: Configuring iptables service
+      become: yes
+      copy:
+        src: /etc/ansible/templates/script_iptables.service.template
+        dest: /etc/systemd/system/script_iptables.service
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Downloading iptables script
-      command: scp root@147.99.65.180:/etc/ansible/templates/script_iptables.service.template . #Downloading the template of iptables script
-     
-    - name: Renaming iptables.service template
-      command: mv script_iptables.service.template /etc/systemd/system/script_iptables.service #Moving the downloaded template in the good directory
+    - name: Converting a typicall upstart job to a systemd one
+      command: "{{item}}"
+      with_items:
+        - systemctl daemon-reload
+        - systemctl enable script_iptables
 
-    - name: Converting a typicall upstart job to a systemd one #apply iptables changes
-      command: systemctl daemon-reload
-      command: systemctl enable script_iptables.service
-      command: systemctl enable script_iptables
+###### LXC CONFIGURATION ######
 
-###### BRUTEFORCE PROTECTION ######
+    - name: Setting the Network configurations
+      become: yes
+      copy:
+        src: /etc/ansible/templates/netplan-master.template
+        dest: /etc/netplan/50-cloud-init.yaml
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Configuring bruteforce protection (fail2ban)
-      command: scp root@147.99.65.180:/etc/ansible/templates/fail2ban.template . #Downloading template from an external computer
-    
-    - name: Moving file in the good directory
-      command: mv fail2ban.template /etc/fail2ban/jail.d/custom.conf
+    - name: Setting up LXC/LXD Networking
+      command: "{{item}}"
+      with_items:
+        - lxd init --auto
+        - lxc config set core.https_address [::]:8443
+        - lxc profile device set default eth0 parent netbr0
+        - service lxd restart
 
-    - name: Restarting fail2ban service
-      command: service fail2ban restart
+###### NFS CONFIGURATION ######
 
-###### LXC REMOTE CONFIGURATION ######
+    - name: Getting the export file
+      become: yes
+      copy:
+        src: /etc/ansible/templates/exports.june.template
+        dest: /etc/exports
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Listen on the 8443 port for remote launch of container
-      command: lxc config set core.https_address [::]:8443
+    - name: Configuring NFS server
+      command: "{{item}}"
+      with_items:
+        - mkdir -p /mnt/sharedfolder
+        - sudo chown nobody:nogroup /mnt/sharedfolder
+        - sudo chmod 777 /mnt/sharedfolder
       
-###### SSH PUBKEY CONFIGURATION ######
+    - name: Sharing the folder
+      command: exportfs -rav #VERY important step
 
-    - name: Creating and sharing an SSH Key
-      command: ssh-keygen -t rsa #Creating a encrypted key
-      command: ssh-copy-id 192.168.100.23 #sending the key to the first slave (static ip)
-      command: ssh-copy-id 192.168.100.26 #sending the key to the second slave (static ip)
-      command: ssh-copy-id 192.168.100.48 #sending the key to the third slave (static ip)
-      command: service ssh restart #restarting ssh
-      command: service sshd restart #restarting sshd 
+##### ANSIBLE CONFIGURATION #####
 
-###### NETWORK RESTART  ######
+    - name: Importing the ansible directory
+      become: yes
+      copy:
+        src: /etc/ansible/templates/ansible.template
+        dest: /etc/ansible
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Restarting networking/dhcp services
-      command: service isc-dhcp-server restart
-      command: service networking restart       
+###### RESTARTING SERVICES AT THE END ######
+
+    - name: Restarting services
+      command: systemctl restart isc-dhcp-server networking ssh sshd nfs-kernel-server
+
 ...
