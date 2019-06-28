@@ -1,0 +1,16 @@
+---
+- name: Package Installation
+  hosts: all:!master  #group declared in the 'hosts' file
+  remote_user: ubuntu
+
+##### NIS CLIENT CONFIGURATION #####
+
+  tasks:
+    - name: NFS client install
+      become: yes
+      apt:
+        name: nis
+        update_cache: yes
+
+    - name: 
+

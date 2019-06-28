@@ -1,62 +1,70 @@
 ---
 - name: Package Installation
-  hosts: all:!yp-srv  #group "slaves" is declared in the 'hosts' file
-  remote_user: root #ansible connexion used the "root" user
+  hosts: all:!yp-srv  #group declared in the 'hosts' file
+  remote_user: ubuntu 
 
 ##### NIS CLIENT CONFIGURATION #####
 
   tasks:
     - name: NIS automatic install
+      become: yes
       apt:
         name: nis
         update_cache: yes
         dpkg_options: 'force-confold,force-confdef'
 
+    - name: Stop the services
+      become: yes
+      command: systemctl stop rpcbind nis
+
 ## Default Domain ##
     - name: Changing the domain name
-      command: scp 192.168.150.199:/etc/ansible/templates/defaultdomain.template /etc/
+      become: yes
+      copy:
+        src: /etc/ansible/templates/defaultdomain.template
+        dest: /etc/defaultdomain
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
-    - name: Moving the old file
-      command: mv /etc/defaultdomain /etc/defaultdomain.bkp
-
-    - name: Placing the new one
-      command: mv /etc/defaultdomain.template /etc/defaultdomain
-
-## yp configuration file ##
+## yp configuration file ##    
     - name: Changing the yp.conf file
-      command: scp 192.168.150.199:/etc/ansible/templates/yp.conf.june.template /etc/
-
-    - name: Moving the old file
-      command: mv /etc/yp.conf /etc/yp.conf.bkp
-
-    - name: Placing the new one
-      command: mv /etc/yp.conf.june.template /etc/yp.conf
+      become: yes
+      copy:
+        src: /etc/ansible/templates/yp.conf.june.template
+        dest: /etc/yp.conf
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
 ## nsswitch file ##
-
     - name: Changing the nsswitch file
-      command: scp 192.168.150.199:/etc/ansible/templates/nsswitch.conf.june.template /etc/
-
-    - name: Moving the old file
-      command: mv /etc/nsswitch.conf /etc/nsswitch.conf.bkp
-
-    - name: Placing the new one
-      command: mv /etc/nsswitch.conf.june.template /etc/nsswitch.conf
+      become: yes
+      copy:
+        src: /etc/ansible/templates/nsswitch.conf.june.template 
+        dest: /etc/nsswitch.conf
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
 ## common-session file ##
-
     - name: Changing the common-session file
-      command: scp 192.168.150.199:/etc/ansible/templates/common-session.june.template /etc/pam.d/
-
-    - name: Moving the old file
-      command: mv /etc/pam.d/common-session /etc/pam.d/common-session.bkp
-
-    - name: Placing the new one
-      command: mv /etc/pam.d/common-session.june.template /etc/pam.d/common-session
+      become: yes
+      copy:
+        src: /etc/ansible/templates/common-session.june.template 
+        dest: /etc/pam.d/common-session
+        owner: nobody
+        group: nogroup
+        mode: '0644'
 
 ##### SERVICES RESTARTS #####
 
     - name: binding the server
+      become: yes
       command: ypbind
+
+    - name: restarting the nis services
+      become: yes
+      command: systemctl restart nis rpcbind
 ...
 

@@ -6,9 +6,10 @@
   tasks:
     - name: Packages Installation
       become: yes
-      apt: name={{ item }} update_cache=yes  state=latest
-      with_items: 
-        - ifupdown
+      apt: "{{ items }}" update_cache=yes state=latest
+      with_items:
+         - htop
+         - tree
 
     - name: Copy file with owner and permissions
       become: yes
@@ -19,5 +20,5 @@
         group: nogroup
         mode: '0644'
 
-- name: Calling yp-clients.yml
-  import_playbook: yp-clients.yml
+
+

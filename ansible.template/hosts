@@ -21,14 +21,15 @@
 #192.168.1.100
 #192.168.1.110
 [slaves]
-192.168.150.101
+#192.168.150.101
+192.168.150.125
 
 [slaves:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 [master]
 #Master ip
-147.99.64.109
+#147.99.64.109
 #Use python3
 
 [master:vars]
@@ -36,7 +37,7 @@ ansible_python_interpreter=/usr/bin/python3
 
 #Containers by functions with their respective IP addresses
 [nfs-srv]
-192.168.150.111
+#192.168.150.111
 
 [nfs-srv:vars]
 ansible_python_interpreter=/usr/bin/python3
@@ -48,23 +49,30 @@ ansible_python_interpreter=/usr/bin/python3
 #ansible_python_interpreter=/usr/bin/python3
 
 [yp-srv]
-192.168.150.112
-192.168.150.113
+#192.168.150.112
+#192.168.150.113
+192.168.150.120
 
 [yp-srv:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 [yp-cli]
-192.168.150.102
-192.168.150.104
+#192.168.150.102
+#192.168.150.104
 
 [yp-cli:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 [pxe]
-192.168.150.110
+#192.168.150.110
 
 [pxe:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+[copy]
+192.168.150.119
+
+[copy:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 # If you have multiple hosts following a pattern you can specify
