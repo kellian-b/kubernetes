@@ -57,7 +57,7 @@ And you can create your own subnet as such :
 
 	subnet 192.168..0 netmask 255.255.255.0 {	#You can change the subnet for your own, as x.x.x.0
   	range 192.168.100.15 192.168.100.115;
-  	option domain-name-servers 147.99.64.102, 147.99.0.248;	 #DNS addresses
+  	option domain-name-servers x.x.x.x, x.x.x.x;	 #DNS addresses
   	option domain-name "sio.internal.lan";
   	option subnet-mask 255.255.255.0;
   	option routers 192.168.100.12;	#The default gateway that will be used by the machines inside your subnet
@@ -394,7 +394,7 @@ The aim is to launch docker containers on the slaves from the master. To do so, 
 First of all, synch the dates and times between the nodes (we have the habit of using ntpdate). If you don't do it, you will encounter several errors. Synch the time with the DNS server:
 
 	apt install ntpdate
-	ntpdate 147.99.64.102
+	ntpdate x.x.x.x #DNS ADDRESS
 	
 Next, get the Kubernetes signing key :
 
